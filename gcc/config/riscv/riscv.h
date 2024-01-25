@@ -1231,8 +1231,10 @@ extern void riscv_remove_unneeded_save_restore_calls (void);
    e.g. RVVMF64BI vs RVVMF1BI on zvl512b, which is [1, 1] vs [64, 64].  */
 #define MAX_POLY_VARIANT 64
 
-#define HAVE_POST_MODIFY_DISP TARGET_XTHEADMEMIDX
+#define HAVE_POST_MODIFY_DISP (TARGET_XTHEADMEMIDX || TARGET_XCVMEM)
 #define HAVE_PRE_MODIFY_DISP  TARGET_XTHEADMEMIDX
+
+#define HAVE_POST_MODIFY_REG TARGET_XCVMEM
 
 /* Check TLS Descriptors mechanism is selected.  */
 #define TARGET_TLSDESC (riscv_tls_dialect == TLS_DESCRIPTORS)
