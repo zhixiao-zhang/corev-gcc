@@ -1,5 +1,6 @@
 /* { dg-do compile } */
 /* { dg-skip-if "-march given" { *-*-* } { "-march=*" } } */
+/* { dg-require-effective-target rv64 }
 /* { dg-options "-mcpu=xiangshan-nanhu" { target { rv64 } } } */
 /* XiangShan Nanhu => rv64imafdc_zba_zbb_zbc_zbs_zbkb_zbkc_zbkx_zknd
                       _zkne_zknh_zksed_zksh_svinval_zicbom_zicboz */

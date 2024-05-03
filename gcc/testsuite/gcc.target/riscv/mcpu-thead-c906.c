@@ -1,5 +1,6 @@
 /* { dg-do compile } */
 /* { dg-skip-if "-march given" { *-*-* } { "-march=*" } } */
+/* { dg-require-effective-target rv64 }
 /* { dg-options "-mcpu=thead-c906" { target { rv64 } } } */
 /* T-Head XuanTie C906 => rv64imafdc */
 
