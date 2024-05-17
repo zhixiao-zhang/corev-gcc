@@ -2740,17 +2740,21 @@
 (define_insn "riscv_cv_bitmanip_bclr"
   [(set (match_operand:SI 0 "register_operand" "=r,r")
 	(and:SI
-          (match_operand:SI 1 "register_operand" "r,r")
-	  (zero_extract:SI
-	    (const_int 0)
-          (ashiftrt:SI
-            (match_operand:HI 2 "bit_extract_operand" "CV_bit_si10,r")
-            (const_int 5))
-          (plus:SI
-            (and:SI
-              (match_dup 2)
-              (const_int 31))
-            (const_int 1)))))]
+         (match_operand:SI 1 "register_operand" "r,r")
+	 (not:SI
+	  (ashift:SI
+	   (lshiftrt:SI
+	    (const_int -1)
+	    (minus:SI
+	     (const_int 31)
+             (lshiftrt:SI
+	      (and:SI
+               (match_operand:HI 2 "bit_extract_operand" "CV_bit_si10,r")
+	       (const_int 1023))
+              (const_int 5))))
+           (and:SI
+            (match_dup 2)
+            (const_int 31))))))]
 
   "TARGET_XCVBITMANIP && !TARGET_64BIT"
   "@
@@ -2763,16 +2767,19 @@
   [(set (match_operand:SI 0 "register_operand" "=r,r")
         (ior:SI
           (match_operand:SI 1 "register_operand" "r,r")
-          (sign_extract:SI
-            (const_int -2)
-          (ashiftrt:SI
-            (match_operand:HI 2 "bit_extract_operand" "CV_bit_si10,r")
-            (const_int 5))
-          (plus:SI
-            (and:SI
-              (match_dup 2)
-              (const_int 31))
-            (const_int 1)))))]
+	  (ashift:SI
+	   (lshiftrt:SI
+	    (const_int -1)
+	    (minus:SI
+	     (const_int 31)
+             (lshiftrt:SI
+	      (and:SI
+               (match_operand:HI 2 "bit_extract_operand" "CV_bit_si10,r")
+	       (const_int 1023))
+              (const_int 5))))
+           (and:SI
+            (match_dup 2)
+            (const_int 31)))))]
 
   "TARGET_XCVBITMANIP && !TARGET_64BIT"
   "@
