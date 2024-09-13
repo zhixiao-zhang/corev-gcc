@@ -30,66 +30,6 @@
 
   ;;CORE-V SIMD
   ;;CORE-V SIMD ALU
-  UNSPEC_CV_ADD_H
-  UNSPEC_CV_ADD_B
-  UNSPEC_CV_ADD_SC_H
-  UNSPEC_CV_ADD_SC_B
-  UNSPEC_CV_SUB_H
-  UNSPEC_CV_SUB_B
-  UNSPEC_CV_SUB_SC_H
-  UNSPEC_CV_SUB_SC_B
-  UNSPEC_CV_AVG_H
-  UNSPEC_CV_AVG_B
-  UNSPEC_CV_AVG_SC_H
-  UNSPEC_CV_AVG_SC_B
-  UNSPEC_CV_AVGU_H
-  UNSPEC_CV_AVGU_B
-  UNSPEC_CV_AVGU_SC_H
-  UNSPEC_CV_AVGU_SC_B
-  UNSPEC_CV_MIN_H
-  UNSPEC_CV_MIN_B
-  UNSPEC_CV_MIN_SC_H
-  UNSPEC_CV_MIN_SC_B
-  UNSPEC_CV_MINU_H
-  UNSPEC_CV_MINU_B
-  UNSPEC_CV_MINU_SC_H
-  UNSPEC_CV_MINU_SC_B
-  UNSPEC_CV_MAX_H
-  UNSPEC_CV_MAX_B
-  UNSPEC_CV_MAX_SC_H
-  UNSPEC_CV_MAX_SC_B
-  UNSPEC_CV_MAXU_H
-  UNSPEC_CV_MAXU_B
-  UNSPEC_CV_MAXU_SC_H
-  UNSPEC_CV_MAXU_SC_B
-  UNSPEC_CV_SRL_H
-  UNSPEC_CV_SRL_B
-  UNSPEC_CV_SRL_SC_H
-  UNSPEC_CV_SRL_SC_B
-  UNSPEC_CV_SRA_H
-  UNSPEC_CV_SRA_B
-  UNSPEC_CV_SRA_SC_H
-  UNSPEC_CV_SRA_SC_B
-  UNSPEC_CV_SLL_H
-  UNSPEC_CV_SLL_B
-  UNSPEC_CV_SLL_SC_H
-  UNSPEC_CV_SLL_SC_B
-  UNSPEC_CV_OR_H
-  UNSPEC_CV_OR_B
-  UNSPEC_CV_OR_SC_H
-  UNSPEC_CV_OR_SC_B
-  UNSPEC_CV_XOR_H
-  UNSPEC_CV_XOR_B
-  UNSPEC_CV_XOR_SC_H
-  UNSPEC_CV_XOR_SC_B
-  UNSPEC_CV_AND_H
-  UNSPEC_CV_AND_B
-  UNSPEC_CV_AND_SC_H
-  UNSPEC_CV_AND_SC_B
-  UNSPEC_CV_ABS_H
-  UNSPEC_CV_ABS_B
-  UNSPEC_CV_NEG_H
-  UNSPEC_CV_NEG_B
 
   ;;CORE-V SIMD BIT MANIPULATION
   UNSPEC_CV_EXTRACT_H
@@ -879,10 +819,13 @@
 ;;CORE-V SIMD ALU
 (define_insn "riscv_cv_simd_add_h_si"
 	[(set (match_operand:SI 0 "register_operand" "=r,r,r,r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r,r,r,r")
-		(match_operand:SI 2 "register_operand" "r,r,r,r")
-		(match_operand:QI 3 "const_int2_operand" "J,c01,c02,c03")]
-	UNSPEC_CV_ADD_H))]
+		(lshiftrt:SI
+			(and:SI 
+				(plus:SI
+					(match_operand:SI 1 "register_operand" "r,r,r,r")
+					(match_operand:SI 2 "register_operand" "r,r,r,r"))
+				(const_int 65535))
+			(match_operand:QI 3 "const_int2_operand" "J,c01,c02,c03")))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"@
 	 cv.add.h\t%0,%1,%2
@@ -895,9 +838,11 @@
 
 (define_insn "riscv_cv_simd_add_b_si"
 	[(set (match_operand:SI 0 "register_operand" "=r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r")
-		(match_operand:SI 2 "register_operand" "r")]
-	UNSPEC_CV_ADD_B))]
+		(and:SI
+			(plus:SI
+				(match_operand:SI 1 "register_operand" "r")
+				(match_operand:SI 2 "register_operand" "r"))
+			(const_int 255)))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"cv.add.b\t%0,%1,%2"
 	[(set_attr "type" "arith")
@@ -906,9 +851,11 @@
 
 (define_insn "riscv_cv_simd_add_sc_h_si"
 	[(set (match_operand:SI 0 "register_operand" "=r,r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r,r")
-		(match_operand:HI 2 "int6s_operand" "CV_simd_si6,r")]
-	UNSPEC_CV_ADD_SC_H))]
+		(and:SI
+			(plus:SI
+				(match_operand:SI 1 "register_operand" "r,r")
+				(match_operand:HI 2 "int6s_operand" "CV_simd_si6, r"))
+			(const_int 65535)))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"@
 	 cv.add.sci.h\t%0,%1,%2
@@ -919,9 +866,11 @@
 
 (define_insn "riscv_cv_simd_add_sc_b_si"
 	[(set (match_operand:SI 0 "register_operand" "=r,r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r,r")
-		(match_operand:QI 2 "int6s_operand" "CV_simd_si6,r")]
-	UNSPEC_CV_ADD_SC_B))]
+		(and:SI
+			(plus:SI
+				(match_operand:SI 1 "register_operand" "r,r")
+				(match_operand:QI 2 "int6s_operand" "CV_simd_si6,r"))
+		(const_int 255)))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"@
 	 cv.add.sci.b\t%0,%1,%2
@@ -932,10 +881,13 @@
 
 (define_insn "riscv_cv_simd_sub_h_si"
 	[(set (match_operand:SI 0 "register_operand" "=r,r,r,r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r,r,r,r")
-		(match_operand:SI 2 "register_operand" "r,r,r,r")
-		(match_operand:QI 3 "const_int2_operand" "J,c01,c02,c03")]
-	UNSPEC_CV_SUB_H))]
+		(lshiftrt:SI
+			(and:SI
+				(minus:SI
+					(match_operand:SI 1 "register_operand" "r,r,r,r")
+					(match_operand:SI 2 "register_operand" "r,r,r,r"))
+				(const_int 65535))
+			(match_operand:QI 3 "const_int2_operand" "J,c01,c02,c03")))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"@
 	 cv.sub.h\t%0,%1,%2
@@ -948,9 +900,11 @@
 
 (define_insn "riscv_cv_simd_sub_b_si"
 	[(set (match_operand:SI 0 "register_operand" "=r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r")
-		(match_operand:SI 2 "register_operand" "r")]
-	UNSPEC_CV_SUB_B))]
+		(and:SI
+			(minus:SI
+				(match_operand:SI 1 "register_operand" "r")
+				(match_operand:SI 2 "register_operand" "r"))
+		(const_int 255)))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"cv.sub.b\t%0,%1,%2"
 	[(set_attr "type" "arith")
@@ -959,9 +913,11 @@
 
 (define_insn "riscv_cv_simd_sub_sc_h_si"
 	[(set (match_operand:SI 0 "register_operand" "=r,r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r,r")
-		(match_operand:HI 2 "int6s_operand" "CV_simd_si6,r")]
-	UNSPEC_CV_SUB_SC_H))]
+		(and:SI
+			(minus:SI
+				(match_operand:SI 1 "register_operand" "r,r")
+				(match_operand:HI 2 "int6s_operand" "r,r"))
+		(const_int 65535)))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"@
 	 cv.sub.sci.h\t%0,%1,%2
@@ -972,9 +928,11 @@
 
 (define_insn "riscv_cv_simd_sub_sc_b_si"
 	[(set (match_operand:SI 0 "register_operand" "=r,r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r,r")
-		(match_operand:QI 2 "int6s_operand" "CV_simd_si6,r")]
-	UNSPEC_CV_SUB_SC_B))]
+		(and:SI
+			(minus:SI
+				(match_operand:SI 1 "register_operand" "r,r")
+				(match_operand:QI 2 "int6s_operand" "r,r"))
+		(const_int 255)))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"@
 	 cv.sub.sci.b\t%0,%1,%2
@@ -985,9 +943,13 @@
 
 (define_insn "riscv_cv_simd_avg_h_si"
 	[(set (match_operand:SI 0 "register_operand" "=r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r")
-		(match_operand:SI 2 "register_operand" "r")]
-	UNSPEC_CV_AVG_H))]
+		(ashiftrt:SI
+			(and:SI
+				(plus:SI
+					(match_operand:SI 1 "register_operand" "r")
+					(match_operand:SI 2 "register_operand" "r"))
+				(const_int 65535))
+			(const_int 1)))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"cv.avg.h\t%0,%1,%2"
 	[(set_attr "type" "arith")
@@ -996,9 +958,13 @@
 
 (define_insn "riscv_cv_simd_avg_b_si"
 	[(set (match_operand:SI 0 "register_operand" "=r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r")
-		(match_operand:SI 2 "register_operand" "r")]
-	UNSPEC_CV_AVG_B))]
+		(ashiftrt:SI
+			(and:SI
+				(plus:SI
+					(match_operand:SI 1 "register_operand" "r")
+					(match_operand:SI 2 "register_operand" "r"))
+				(const_int 255))
+			(const_int 1)))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"cv.avg.b\t%0,%1,%2"
 	[(set_attr "type" "arith")
@@ -1007,9 +973,13 @@
 
 (define_insn "riscv_cv_simd_avg_sc_h_si"
 	[(set (match_operand:SI 0 "register_operand" "=r,r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r,r")
-		(match_operand:HI 2 "int6s_operand" "CV_simd_si6,r")]
-	UNSPEC_CV_AVG_SC_H))]
+		(ashiftrt:SI
+			(and:SI
+				(plus:SI
+					(match_operand:SI 1 "register_operand" "r,r")
+					(match_operand:HI 2 "int6s_operand" "CV_simd_si6,r"))
+				(const_int 65535))
+			(const_int 1)))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"@
 	 cv.avg.sci.h\t%0,%1,%2
@@ -1020,9 +990,13 @@
 
 (define_insn "riscv_cv_simd_avg_sc_b_si"
 	[(set (match_operand:SI 0 "register_operand" "=r,r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r,r")
-		(match_operand:QI 2 "int6s_operand" "CV_simd_si6,r")]
-	UNSPEC_CV_AVG_SC_B))]
+		(ashiftrt:SI
+			(and:SI
+				(plus:SI
+					(match_operand:SI 1 "register_operand" "r,r")
+					(match_operand:QI 2 "int6s_operand" "CV_simd_si6,r"))
+				(const_int 255))
+			(const_int 1)))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"@
 	 cv.avg.sci.b\t%0,%1,%2
@@ -1033,9 +1007,13 @@
 
 (define_insn "riscv_cv_simd_avgu_h_si"
 	[(set (match_operand:SI 0 "register_operand" "=r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r")
-		(match_operand:SI 2 "register_operand" "r")]
-	UNSPEC_CV_AVGU_H))]
+		(lshiftrt:SI
+			(and:SI
+				(plus:SI
+					(match_operand:SI 1 "register_operand" "r")
+					(match_operand:SI 2 "register_operand" "r"))
+				(const_int 65535))
+			(const_int 1)))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"cv.avgu.h\t%0,%1,%2"
 	[(set_attr "type" "arith")
@@ -1044,9 +1022,13 @@
 
 (define_insn "riscv_cv_simd_avgu_b_si"
 	[(set (match_operand:SI 0 "register_operand" "=r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r")
-		(match_operand:SI 2 "register_operand" "r")]
-	UNSPEC_CV_AVGU_B))]
+		(lshiftrt:SI
+			(and:SI
+				(plus:SI
+					(match_operand:SI 1 "register_operand" "r")
+					(match_operand:SI 2 "register_operand" "r"))
+				(const_int 255))
+			(const_int 1)))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"cv.avgu.b\t%0,%1,%2"
 	[(set_attr "type" "arith")
@@ -1055,9 +1037,13 @@
 
 (define_insn "riscv_cv_simd_avgu_sc_h_si"
 	[(set (match_operand:SI 0 "register_operand" "=r,r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r,r")
-		(match_operand:HI 2 "int6_operand" "CV_simd_un6,r")]
-	UNSPEC_CV_AVGU_SC_H))]
+		(lshiftrt:SI
+			(and:SI
+				(plus:SI
+					(match_operand:SI 1 "register_operand" "r,r")
+					(match_operand:HI 2 "int6_operand" "CV_simd_si6,r"))
+				(const_int 65535))
+			(const_int 1)))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"@
 	 cv.avgu.sci.h\t%0,%1,%2
@@ -1068,9 +1054,13 @@
 
 (define_insn "riscv_cv_simd_avgu_sc_b_si"
 	[(set (match_operand:SI 0 "register_operand" "=r,r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r,r")
-		(match_operand:QI 2 "int6_operand" "CV_simd_un6,r")]
-	UNSPEC_CV_AVGU_SC_B))]
+		(lshiftrt:SI
+			(and:SI
+				(plus:SI
+					(match_operand:SI 1 "register_operand" "r,r")
+					(match_operand:QI 2 "int6_operand" "CV_simd_un6,r"))
+				(const_int 65535))
+			(const_int 1)))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"@
 	 cv.avgu.sci.b\t%0,%1,%2
@@ -1081,9 +1071,12 @@
 
 (define_insn "riscv_cv_simd_min_h_si"
 	[(set (match_operand:SI 0 "register_operand" "=r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r")
-		(match_operand:SI 2 "register_operand" "r")]
-	UNSPEC_CV_MIN_H))]
+		(if_then_else
+			(lt:SI
+				(match_operand:SI 1 "register_operand" "r")
+				(match_operand:SI 2 "register_operand" "r"))
+			(match_dup 1)
+			(match_dup 2)))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"cv.min.h\t%0,%1,%2"
 	[(set_attr "type" "arith")
@@ -1092,9 +1085,12 @@
 
 (define_insn "riscv_cv_simd_min_b_si"
 	[(set (match_operand:SI 0 "register_operand" "=r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r")
-		(match_operand:SI 2 "register_operand" "r")]
-	UNSPEC_CV_MIN_B))]
+		(if_then_else
+			(lt:SI
+				(match_operand:SI 1 "register_operand" "r")
+				(match_operand:SI 2 "register_operand" "r"))
+			(match_dup 1)
+			(match_dup 2)))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"cv.min.b\t%0,%1,%2"
 	[(set_attr "type" "arith")
@@ -1103,9 +1099,12 @@
 
 (define_insn "riscv_cv_simd_min_sc_h_si"
 	[(set (match_operand:SI 0 "register_operand" "=r,r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r,r")
-		(match_operand:HI 2 "int6s_operand" "CV_simd_si6,r")]
-	UNSPEC_CV_MIN_SC_H))]
+		(if_then_else
+			(lt:SI
+				(match_operand:SI 1 "register_operand" "r,r")
+				(match_operand:HI 2 "int6s_operand" "CV_simd_si6,r"))
+			(match_dup 1)
+			(match_dup 2)))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"@
 	 cv.min.sci.h\t%0,%1,%2
@@ -1116,9 +1115,12 @@
 
 (define_insn "riscv_cv_simd_min_sc_b_si"
 	[(set (match_operand:SI 0 "register_operand" "=r,r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r,r")
-		(match_operand:QI 2 "int6s_operand" "CV_simd_si6,r")]
-	UNSPEC_CV_MIN_SC_B))]
+		(if_then_else
+			(lt:SI
+				(match_operand:SI 1 "register_operand" "r,r")
+				(match_operand:QI 2 "int6s_operand" "CV_simd_si6,r"))
+			(match_dup 1)
+			(match_dup 2)))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"@
 	 cv.min.sci.b\t%0,%1,%2
@@ -1129,9 +1131,12 @@
 
 (define_insn "riscv_cv_simd_minu_h_si"
 	[(set (match_operand:SI 0 "register_operand" "=r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r")
-		(match_operand:SI 2 "register_operand" "r")]
-	UNSPEC_CV_MINU_H))]
+		(if_then_else
+			(ltu:SI
+				(match_operand:SI 1 "register_operand" "r")
+				(match_operand:SI 2 "register_operand" "r"))
+			(match_dup 1)
+			(match_dup 2)))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"cv.minu.h\t%0,%1,%2"
 	[(set_attr "type" "arith")
@@ -1140,9 +1145,12 @@
 
 (define_insn "riscv_cv_simd_minu_b_si"
 	[(set (match_operand:SI 0 "register_operand" "=r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r")
-		(match_operand:SI 2 "register_operand" "r")]
-	UNSPEC_CV_MINU_B))]
+		(if_then_else
+			(ltu:SI
+				(match_operand:SI 1 "register_operand" "r")
+				(match_operand:SI 2 "register_operand" "r"))
+			(match_dup 1)
+			(match_dup 2)))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"cv.minu.b\t%0,%1,%2"
 	[(set_attr "type" "arith")
@@ -1151,9 +1159,12 @@
 
 (define_insn "riscv_cv_simd_minu_sc_h_si"
 	[(set (match_operand:SI 0 "register_operand" "=r,r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r,r")
-		(match_operand:HI 2 "int6_operand" "CV_simd_un6,r")]
-	UNSPEC_CV_MINU_SC_H))]
+		(if_then_else
+			(ltu:SI
+				(match_operand:SI 1 "register_operand" "r,r")
+				(match_operand:HI 2 "int6_operand" "CV_simd_un6,r"))
+			(match_dup 1)
+			(match_dup 2)))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"@
 	 cv.minu.sci.h\t%0,%1,%2
@@ -1164,9 +1175,12 @@
 
 (define_insn "riscv_cv_simd_minu_sc_b_si"
 	[(set (match_operand:SI 0 "register_operand" "=r,r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r,r")
-		(match_operand:QI 2 "int6_operand" "CV_simd_un6,r")]
-	UNSPEC_CV_MINU_SC_B))]
+		(if_then_else
+			(ltu:SI
+				(match_operand:SI 1 "register_operand" "r,r")
+				(match_operand:QI 2 "int6_operand" "CV_simd_un6,r"))
+			(match_dup 1)
+			(match_dup 2)))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"@
 	 cv.minu.sci.b\t%0,%1,%2
@@ -1177,9 +1191,12 @@
 
 (define_insn "riscv_cv_simd_max_h_si"
 	[(set (match_operand:SI 0 "register_operand" "=r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r")
-		(match_operand:SI 2 "register_operand" "r")]
-	UNSPEC_CV_MAX_H))]
+		(if_then_else
+			(gt:SI
+				(match_operand:SI 1 "register_operand" "r")
+				(match_operand:SI 2 "register_operand" "r"))
+			(match_dup 1)
+			(match_dup 2)))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"cv.max.h\t%0,%1,%2"
 	[(set_attr "type" "arith")
@@ -1188,9 +1205,12 @@
 
 (define_insn "riscv_cv_simd_max_b_si"
 	[(set (match_operand:SI 0 "register_operand" "=r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r")
-		(match_operand:SI 2 "register_operand" "r")]
-	UNSPEC_CV_MAX_B))]
+		(if_then_else
+			(gt:SI
+				(match_operand:SI 1 "register_operand" "r")
+				(match_operand:SI 2 "register_operand" "r"))
+			(match_dup 1)
+			(match_dup 2)))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"cv.max.b\t%0,%1,%2"
 	[(set_attr "type" "arith")
@@ -1199,9 +1219,12 @@
 
 (define_insn "riscv_cv_simd_max_sc_h_si"
 	[(set (match_operand:SI 0 "register_operand" "=r,r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r,r")
-		(match_operand:HI 2 "int6s_operand" "CV_simd_si6,r")]
-	UNSPEC_CV_MAX_SC_H))]
+		(if_then_else
+			(gt:SI
+				(match_operand:SI 1 "register_operand" "r,r")
+				(match_operand:HI 2 "int6s_operand" "CV_simd_si6,r"))
+			(match_dup 1)
+			(match_dup 2)))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"@
 	 cv.max.sci.h\t%0,%1,%2
@@ -1212,9 +1235,12 @@
 
 (define_insn "riscv_cv_simd_max_sc_b_si"
 	[(set (match_operand:SI 0 "register_operand" "=r,r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r,r")
-		(match_operand:QI 2 "int6s_operand" "CV_simd_si6,r")]
-	UNSPEC_CV_MAX_SC_B))]
+		(if_then_else
+			(gt:SI
+				(match_operand:SI 1 "register_operand" "r,r")
+				(match_operand:QI 2 "int6s_operand" "CV_simd_si6,r"))
+			(match_dup 1)
+			(match_dup 2)))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"@
 	 cv.max.sci.b\t%0,%1,%2
@@ -1225,9 +1251,12 @@
 
 (define_insn "riscv_cv_simd_maxu_h_si"
 	[(set (match_operand:SI 0 "register_operand" "=r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r")
-		(match_operand:SI 2 "register_operand" "r")]
-	UNSPEC_CV_MAXU_H))]
+		(if_then_else
+			(gtu:SI
+				(match_operand:SI 1 "register_operand" "r")
+				(match_operand:SI 2 "register_operand" "r"))
+			(match_dup 1)
+			(match_dup 2)))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"cv.maxu.h\t%0,%1,%2"
 	[(set_attr "type" "arith")
@@ -1236,9 +1265,12 @@
 
 (define_insn "riscv_cv_simd_maxu_b_si"
 	[(set (match_operand:SI 0 "register_operand" "=r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r")
-		(match_operand:SI 2 "register_operand" "r")]
-	UNSPEC_CV_MAXU_B))]
+		(if_then_else
+			(gtu:SI
+				(match_operand:SI 1 "register_operand" "r")
+				(match_operand:SI 2 "register_operand" "r"))
+			(match_dup 1)
+			(match_dup 2)))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"cv.maxu.b\t%0,%1,%2"
 	[(set_attr "type" "arith")
@@ -1247,9 +1279,12 @@
 
 (define_insn "riscv_cv_simd_maxu_sc_h_si"
 	[(set (match_operand:SI 0 "register_operand" "=r,r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r,r")
-		(match_operand:HI 2 "int6_operand" "CV_simd_un6,r")]
-	UNSPEC_CV_MAXU_SC_H))]
+		(if_then_else
+			(gtu:SI
+				(match_operand:SI 1 "register_operand" "r,r")
+				(match_operand:HI 2 "int6_operand" "CV_simd_un6,r"))
+			(match_dup 1)
+			(match_dup 2)))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"@
 	 cv.maxu.sci.h\t%0,%1,%2
@@ -1260,9 +1295,12 @@
 
 (define_insn "riscv_cv_simd_maxu_sc_b_si"
 	[(set (match_operand:SI 0 "register_operand" "=r,r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r,r")
-		(match_operand:QI 2 "int6_operand" "CV_simd_un6,r")]
-	UNSPEC_CV_MAXU_SC_B))]
+		(if_then_else
+			(gtu:SI
+				(match_operand:SI 1 "register_operand" "r,r")
+				(match_operand:QI 2 "int6_operand" "CV_simd_un6,r"))
+			(match_dup 1)
+			(match_dup 2)))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"@
 	 cv.maxu.sci.b\t%0,%1,%2
@@ -1273,9 +1311,11 @@
 
 (define_insn "riscv_cv_simd_srl_h_si"
 	[(set (match_operand:SI 0 "register_operand" "=r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r")
-		(match_operand:SI 2 "register_operand" "r")]
-	UNSPEC_CV_SRL_H))]
+		(lshiftrt:SI
+			(match_operand:SI 1 "register_operand" "r")
+			(and:SI
+				(match_operand:SI 2 "register_operand" "r")
+				(const_int 15))))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"cv.srl.h\t%0,%1,%2"
 	[(set_attr "type" "arith")
@@ -1284,9 +1324,11 @@
 
 (define_insn "riscv_cv_simd_srl_b_si"
 	[(set (match_operand:SI 0 "register_operand" "=r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r")
-		(match_operand:SI 2 "register_operand" "r")]
-	UNSPEC_CV_SRL_B))]
+		(lshiftrt:SI
+			(match_operand:SI 1 "register_operand" "r")
+			(and:SI
+				(match_operand:SI 2 "register_operand" "r")
+				(const_int 7))))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"cv.srl.b\t%0,%1,%2"
 	[(set_attr "type" "arith")
@@ -1295,9 +1337,11 @@
 
 (define_insn "riscv_cv_simd_srl_sc_h_si"
 	[(set (match_operand:SI 0 "register_operand" "=r,r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r,r")
-		(match_operand:HI 2 "int6_operand" "CV_simd_un6,r")]
-	UNSPEC_CV_SRL_SC_H))]
+		(lshiftrt:SI
+			(match_operand:SI 1 "register_operand" "r,r")
+			(and:SI
+				(match_operand:HI 2 "int6_operand" "CV_simd_un6,r")
+				(const_int 15))))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"@
 	 cv.srl.sci.h\t%0,%1,%2
@@ -1308,9 +1352,11 @@
 
 (define_insn "riscv_cv_simd_srl_sc_b_si"
 	[(set (match_operand:SI 0 "register_operand" "=r,r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r,r")
-		(match_operand:QI 2 "int6_operand" "CV_simd_un6,r")]
-	UNSPEC_CV_SRL_SC_B))]
+		(lshiftrt:SI
+			(match_operand:SI 1 "register_operand" "r,r")
+			(and:SI
+				(match_operand:QI 2 "int6_operand" "CV_simd_un6,r")
+				(const_int 7))))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"@
 	 cv.srl.sci.b\t%0,%1,%2
@@ -1321,9 +1367,11 @@
 
 (define_insn "riscv_cv_simd_sra_h_si"
 	[(set (match_operand:SI 0 "register_operand" "=r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r")
-		(match_operand:SI 2 "register_operand" "r")]
-	UNSPEC_CV_SRA_H))]
+		(ashiftrt:SI
+			(match_operand:SI 1 "register_operand" "r")
+			(and:SI
+				(match_operand:SI 2 "register_operand" "r")
+				(const_int 15))))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"cv.sra.h\t%0,%1,%2"
 	[(set_attr "type" "arith")
@@ -1332,9 +1380,11 @@
 
 (define_insn "riscv_cv_simd_sra_b_si"
 	[(set (match_operand:SI 0 "register_operand" "=r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r")
-		(match_operand:SI 2 "register_operand" "r")]
-	UNSPEC_CV_SRA_B))]
+		(ashiftrt:SI
+			(match_operand:SI 1 "register_operand" "r")
+			(and:SI
+				(match_operand:SI 2 "register_operand" "r")
+				(const_int 7))))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"cv.sra.b\t%0,%1,%2"
 	[(set_attr "type" "arith")
@@ -1343,9 +1393,11 @@
 
 (define_insn "riscv_cv_simd_sra_sc_h_si"
 	[(set (match_operand:SI 0 "register_operand" "=r,r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r,r")
-		(match_operand:HI 2 "int6_operand" "CV_simd_un6,r")]
-	UNSPEC_CV_SRA_SC_H))]
+		(ashiftrt:SI
+			(match_operand:SI 1 "register_operand" "r,r")
+			(and:SI
+				(match_operand:HI 2 "int6_operand" "CV_simd_un6,r")
+				(const_int 15))))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"@
 	 cv.sra.sci.h\t%0,%1,%2
@@ -1356,9 +1408,11 @@
 
 (define_insn "riscv_cv_simd_sra_sc_b_si"
 	[(set (match_operand:SI 0 "register_operand" "=r,r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r,r")
-		(match_operand:QI 2 "int6_operand" "CV_simd_un6,r")]
-	UNSPEC_CV_SRA_SC_B))]
+		(ashiftrt:SI
+			(match_operand:SI 1 "register_operand" "r,r")
+			(and:SI
+				(match_operand:QI 2 "int6_operand" "CV_simd_un6,r")
+				(const_int 7))))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"@
 	 cv.sra.sci.b\t%0,%1,%2
@@ -1369,9 +1423,11 @@
 
 (define_insn "riscv_cv_simd_sll_h_si"
 	[(set (match_operand:SI 0 "register_operand" "=r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r")
-		(match_operand:SI 2 "register_operand" "r")]
-	UNSPEC_CV_SLL_H))]
+		(ashift:SI
+			(match_operand:SI 1 "register_operand" "r")
+			(and:SI
+				(match_operand:SI 2 "register_operand" "r")
+				(const_int 15))))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"cv.sll.h\t%0,%1,%2"
 	[(set_attr "type" "arith")
@@ -1380,9 +1436,11 @@
 
 (define_insn "riscv_cv_simd_sll_b_si"
 	[(set (match_operand:SI 0 "register_operand" "=r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r")
-		(match_operand:SI 2 "register_operand" "r")]
-	UNSPEC_CV_SLL_B))]
+		(ashift:SI
+			(match_operand:SI 1 "register_operand" "r")
+			(and:SI
+				(match_operand:SI 2 "register_operand" "r")
+				(const_int 7))))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"cv.sll.b\t%0,%1,%2"
 	[(set_attr "type" "arith")
@@ -1391,9 +1449,11 @@
 
 (define_insn "riscv_cv_simd_sll_sc_h_si"
 	[(set (match_operand:SI 0 "register_operand" "=r,r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r,r")
-		(match_operand:HI 2 "int6_operand" "CV_simd_un6,r")]
-	UNSPEC_CV_SLL_SC_H))]
+		(ashift:SI
+			(match_operand:SI 1 "register_operand" "r,r")
+			(and:SI
+				(match_operand:HI 2 "int6_operand" "CV_simd_un6,r")
+				(const_int 15))))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"@
 	 cv.sll.sci.h\t%0,%1,%2
@@ -1404,9 +1464,11 @@
 
 (define_insn "riscv_cv_simd_sll_sc_b_si"
 	[(set (match_operand:SI 0 "register_operand" "=r,r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r,r")
-		(match_operand:QI 2 "int6_operand" "CV_simd_un6,r")]
-	UNSPEC_CV_SLL_SC_B))]
+		(ashift:SI
+			(match_operand:SI 1 "register_operand" "r,r")
+			(and:SI
+				(match_operand:QI 2 "int6_operand" "CV_simd_un6,r")
+				(const_int 7))))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"@
 	 cv.sll.sci.b\t%0,%1,%2
@@ -1417,9 +1479,9 @@
 
 (define_insn "riscv_cv_simd_or_h_si"
 	[(set (match_operand:SI 0 "register_operand" "=r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r")
-		(match_operand:SI 2 "register_operand" "r")]
-	UNSPEC_CV_OR_H))]
+		(ior:SI
+			(match_operand:SI 1 "register_operand" "r")
+			(match_operand:SI 2 "register_operand" "r")))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"cv.or.h\t%0,%1,%2"
 	[(set_attr "type" "arith")
@@ -1428,9 +1490,9 @@
 
 (define_insn "riscv_cv_simd_or_b_si"
 	[(set (match_operand:SI 0 "register_operand" "=r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r")
-		(match_operand:SI 2 "register_operand" "r")]
-	UNSPEC_CV_OR_B))]
+		(ior:SI
+			(match_operand:SI 1 "register_operand" "r")
+			(match_operand:SI 2 "register_operand" "r")))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"cv.or.b\t%0,%1,%2"
 	[(set_attr "type" "arith")
@@ -1439,9 +1501,9 @@
 
 (define_insn "riscv_cv_simd_or_sc_h_si"
 	[(set (match_operand:SI 0 "register_operand" "=r,r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r,r")
-		(match_operand:HI 2 "int6s_operand" "CV_simd_si6,r")]
-	UNSPEC_CV_OR_SC_H))]
+		(ior:SI
+			(match_operand:SI 1 "register_operand" "r,r")
+			(match_operand:HI 2 "int6s_operand" "CV_simd_si6,r")))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"@
 	 cv.or.sci.h\t%0,%1,%2
@@ -1452,9 +1514,9 @@
 
 (define_insn "riscv_cv_simd_or_sc_b_si"
 	[(set (match_operand:SI 0 "register_operand" "=r,r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r,r")
-		(match_operand:QI 2 "int6s_operand" "CV_simd_si6,r")]
-	UNSPEC_CV_OR_SC_B))]
+		(ior:SI
+			(match_operand:SI 1 "register_operand" "r,r")
+			(match_operand:QI 2 "int6s_operand" "CV_simd_si6,r")))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"@
 	 cv.or.sci.b\t%0,%1,%2
@@ -1465,9 +1527,9 @@
 
 (define_insn "riscv_cv_simd_xor_h_si"
 	[(set (match_operand:SI 0 "register_operand" "=r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r")
-		(match_operand:SI 2 "register_operand" "r")]
-	UNSPEC_CV_XOR_H))]
+		(xor:SI
+			(match_operand:SI 1 "register_operand" "r")
+			(match_operand:SI 2 "register_operand" "r")))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"cv.xor.h\t%0,%1,%2"
 	[(set_attr "type" "arith")
@@ -1476,9 +1538,9 @@
 
 (define_insn "riscv_cv_simd_xor_b_si"
 	[(set (match_operand:SI 0 "register_operand" "=r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r")
-		(match_operand:SI 2 "register_operand" "r")]
-	UNSPEC_CV_XOR_B))]
+		(xor:SI
+			(match_operand:SI 1 "register_operand" "r")
+			(match_operand:SI 2 "register_operand" "r")))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"cv.xor.b\t%0,%1,%2"
 	[(set_attr "type" "arith")
@@ -1487,9 +1549,9 @@
 
 (define_insn "riscv_cv_simd_xor_sc_h_si"
 	[(set (match_operand:SI 0 "register_operand" "=r,r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r,r")
-		(match_operand:HI 2 "int6s_operand" "CV_simd_si6,r")]
-	UNSPEC_CV_XOR_SC_H))]
+		(xor:SI
+			(match_operand:SI 1 "register_operand" "r,r")
+			(match_operand:HI 2 "int6s_operand" "CV_simd_si6,r")))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"@
 	 cv.xor.sci.h\t%0,%1,%2
@@ -1500,9 +1562,9 @@
 
 (define_insn "riscv_cv_simd_xor_sc_b_si"
 	[(set (match_operand:SI 0 "register_operand" "=r,r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r,r")
-		(match_operand:QI 2 "int6s_operand" "CV_simd_si6,r")]
-	UNSPEC_CV_XOR_SC_B))]
+		(xor:SI
+			(match_operand:SI 1 "register_operand" "r,r")
+			(match_operand:QI 2 "int6s_operand" "CV_simd_si6,r")))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"@
 	 cv.xor.sci.b\t%0,%1,%2
@@ -1513,9 +1575,9 @@
 
 (define_insn "riscv_cv_simd_and_h_si"
 	[(set (match_operand:SI 0 "register_operand" "=r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r")
-		(match_operand:SI 2 "register_operand" "r")]
-	UNSPEC_CV_AND_H))]
+		(and:SI
+			(match_operand:SI 1 "register_operand" "r")
+			(match_operand:SI 2 "register_operand" "r")))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"cv.and.h\t%0,%1,%2"
 	[(set_attr "type" "arith")
@@ -1524,9 +1586,9 @@
 
 (define_insn "riscv_cv_simd_and_b_si"
 	[(set (match_operand:SI 0 "register_operand" "=r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r")
-		(match_operand:SI 2 "register_operand" "r")]
-	UNSPEC_CV_AND_B))]
+		(and:SI
+			(match_operand:SI 1 "register_operand" "r")
+			(match_operand:SI 2 "register_operand" "r")))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"cv.and.b\t%0,%1,%2"
 	[(set_attr "type" "arith")
@@ -1535,9 +1597,9 @@
 
 (define_insn "riscv_cv_simd_and_sc_h_si"
 	[(set (match_operand:SI 0 "register_operand" "=r,r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r,r")
-		(match_operand:HI 2 "int6s_operand" "CV_simd_si6,r")]
-	UNSPEC_CV_AND_SC_H))]
+		(and:SI
+			(match_operand:SI 1 "register_operand" "r,r")
+			(match_operand:HI 2 "int6s_operand" "CV_simd_si6,r")))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"@
 	 cv.and.sci.h\t%0,%1,%2
@@ -1548,9 +1610,9 @@
 
 (define_insn "riscv_cv_simd_and_sc_b_si"
 	[(set (match_operand:SI 0 "register_operand" "=r,r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r,r")
-		(match_operand:QI 2 "int6s_operand" "CV_simd_si6,r")]
-	UNSPEC_CV_AND_SC_B))]
+		(and:SI
+			(match_operand:SI 1 "register_operand" "r,r")
+			(match_operand:QI 2 "int6s_operand" "CV_simd_si6,r")))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"@
 	 cv.and.sci.b\t%0,%1,%2
@@ -1561,7 +1623,10 @@
 
 (define_insn "riscv_cv_simd_abs_h_si"
 	[(set (match_operand:SI 0 "register_operand" "=r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r")]UNSPEC_CV_ABS_H))]
+		(if_then_else
+			(le:SI (match_operand:SI 1 "register_operand" "r") (const_int 0))
+			(neg:SI (match_dup 1))
+			(match_dup 1)))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"cv.abs.h\t%0,%1"
 	[(set_attr "type" "arith")
@@ -1570,7 +1635,10 @@
 
 (define_insn "riscv_cv_simd_abs_b_si"
 	[(set (match_operand:SI 0 "register_operand" "=r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r")]UNSPEC_CV_ABS_B))]
+		(if_then_else
+			(le:SI (match_operand:SI 1 "register_operand" "r") (const_int 0))
+			(neg:SI (match_dup 1))
+			(match_dup 1)))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"cv.abs.b\t%0,%1"
 	[(set_attr "type" "arith")
@@ -1578,21 +1646,21 @@
 
 
 (define_insn "riscv_cv_simd_neg_h_si"
-        [(set (match_operand:SI 0 "register_operand" "=r")
-                (unspec:SI [(match_operand:SI 1 "register_operand" "r")]UNSPEC_CV_NEG_H))]
-        "TARGET_XCVSIMD && !TARGET_64BIT"
-        "cv.sub.h\t%0,zero,%1"
-        [(set_attr "type" "arith")
-        (set_attr "mode" "SI")])
+	[(set (match_operand:SI 0 "register_operand" "=r")
+			(neg:SI (match_operand:SI 1 "register_operand" "r")))]
+	"TARGET_XCVSIMD && !TARGET_64BIT"
+	"cv.sub.h\t%0,zero,%1"
+	[(set_attr "type" "arith")
+	(set_attr "mode" "SI")])
 
 
 (define_insn "riscv_cv_simd_neg_b_si"
-        [(set (match_operand:SI 0 "register_operand" "=r")
-                (unspec:SI [(match_operand:SI 1 "register_operand" "r")]UNSPEC_CV_NEG_B))]
-        "TARGET_XCVSIMD && !TARGET_64BIT"
-        "cv.sub.b\t%0,zero,%1"
-        [(set_attr "type" "arith")
-        (set_attr "mode" "SI")])
+	[(set (match_operand:SI 0 "register_operand" "=r")
+		 (neg:SI (match_operand:SI 1 "register_operand" "r")))]
+	"TARGET_XCVSIMD && !TARGET_64BIT"
+	"cv.sub.b\t%0,zero,%1"
+	[(set_attr "type" "arith")
+	(set_attr "mode" "SI")])
 
 
 ;;CORE-V SIMD BIT MANIPULATION
