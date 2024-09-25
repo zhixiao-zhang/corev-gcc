@@ -29,16 +29,6 @@
   UNSPECV_CV_ELW
 
   ;;CORE-V SIMD
-  ;;CORE-V SIMD ALU
-
-  ;;CORE-V SIMD BIT MANIPULATION
-  UNSPEC_CV_EXTRACT_H
-  UNSPEC_CV_EXTRACT_B
-  UNSPEC_CV_EXTRACTU_H
-  UNSPEC_CV_EXTRACTU_B
-  UNSPEC_CV_INSERT_H
-  UNSPEC_CV_INSERT_B
-
   ;;CORE-V SIMD DOT PRODUCT
   UNSPEC_CV_DOTUP_H
   UNSPEC_CV_DOTUP_B
@@ -1666,9 +1656,14 @@
 ;;CORE-V SIMD BIT MANIPULATION
 (define_insn "riscv_cv_simd_extract_h_si"
 	[(set (match_operand:SI 0 "register_operand" "=r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r")
-		(match_operand:QI 2 "immediate_operand" "CV_simd_si6")]
-	UNSPEC_CV_EXTRACT_H))]
+    (sign_extract:SI 
+      (match_operand:SI 1 "register_operand" "r")
+      (const_int 16)
+      (mult:SI
+        (and:SI
+          (match_operand:QI 2 "immediate_operand" "CV_simd_si6")
+          (const_int 1))
+        (const_int 16))))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"cv.extract.h\t%0,%1,%2"
 	[(set_attr "type" "arith")
@@ -1677,9 +1672,14 @@
 
 (define_insn "riscv_cv_simd_extract_b_si"
 	[(set (match_operand:SI 0 "register_operand" "=r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r")
-		(match_operand:QI 2 "immediate_operand" "CV_simd_si6")]
-	UNSPEC_CV_EXTRACT_B))]
+    (sign_extract:SI 
+      (match_operand:SI 1 "register_operand" "r")
+      (const_int 8)
+      (mult:SI
+        (and:SI
+          (match_operand:QI 2 "immediate_operand" "CV_simd_si6")
+          (const_int 2))
+        (const_int 8))))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"cv.extract.b\t%0,%1,%2"
 	[(set_attr "type" "arith")
@@ -1688,9 +1688,14 @@
 
 (define_insn "riscv_cv_simd_extractu_h_si"
 	[(set (match_operand:SI 0 "register_operand" "=r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r")
-		(match_operand:QI 2 "immediate_operand" "CV_simd_si6")]
-	UNSPEC_CV_EXTRACTU_H))]
+    (zero_extract:SI 
+      (match_operand:SI 1 "register_operand" "r")
+      (const_int 16)
+      (mult:SI
+        (and:SI
+          (match_operand:QI 2 "immediate_operand" "CV_simd_si6")
+          (const_int 1))
+        (const_int 16))))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"cv.extractu.h\t%0,%1,%2"
 	[(set_attr "type" "arith")
@@ -1699,9 +1704,14 @@
 
 (define_insn "riscv_cv_simd_extractu_b_si"
 	[(set (match_operand:SI 0 "register_operand" "=r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r")
-		(match_operand:QI 2 "immediate_operand" "CV_simd_si6")]
-	UNSPEC_CV_EXTRACTU_B))]
+    (zero_extract:SI 
+      (match_operand:SI 1 "register_operand" "r")
+      (const_int 8)
+      (mult:SI
+        (and:SI
+          (match_operand:QI 2 "immediate_operand" "CV_simd_si6")
+          (const_int 2))
+        (const_int 8))))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"cv.extractu.b\t%0,%1,%2"
 	[(set_attr "type" "arith")
@@ -1710,10 +1720,20 @@
 
 (define_insn "riscv_cv_simd_insert_h_si"
 	[(set (match_operand:SI 0 "register_operand" "=r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r")
-		(match_operand:SI 2 "register_operand" "0")
-		(match_operand:QI 3 "immediate_operand" "CV_simd_si6")]
-	UNSPEC_CV_INSERT_H))]
+    (ior:SI
+      (and:SI
+        (sign_extract:SI
+          (match_operand:SI 2 "register_operand" "0")
+          (const_int 16)
+          (mult:SI
+            (and:SI
+              (match_operand:QI 3 "immediate_operand" "CV_simd_si6")
+              (const_int 1))
+            (const_int 16)))
+        (const_int 0))
+      (and:SI
+        (match_operand:SI 1 "register_operand" "r")
+        (const_int 4))))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"cv.insert.h\t%0,%1,%3"
 	[(set_attr "type" "arith")
@@ -1722,10 +1742,20 @@
 
 (define_insn "riscv_cv_simd_insert_b_si"
 	[(set (match_operand:SI 0 "register_operand" "=r")
-		(unspec:SI [(match_operand:SI 1 "register_operand" "r")
-		(match_operand:SI 2 "register_operand" "0")
-		(match_operand:QI 3 "immediate_operand" "CV_simd_si6")]
-	UNSPEC_CV_INSERT_B))]
+    (ior:SI
+      (and:SI
+        (sign_extract:SI
+          (match_operand:SI 2 "register_operand" "0")
+          (const_int 8)
+          (mult:SI
+            (and:SI
+              (match_operand:QI 3 "immediate_operand" "CV_simd_si6")
+              (const_int 2))
+            (const_int 8)))
+        (const_int 0))
+      (and:SI
+        (match_operand:SI 1 "register_operand" "r")
+        (const_int 3))))]
 	"TARGET_XCVSIMD && !TARGET_64BIT"
 	"cv.insert.b\t%0,%1,%3"
 	[(set_attr "type" "arith")
